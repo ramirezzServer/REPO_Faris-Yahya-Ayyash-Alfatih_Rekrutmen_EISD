@@ -3,9 +3,11 @@
 use App\Http\Controllers\Admin\JalurPengolahanController;
 use App\Http\Controllers\Admin\KawasanController;
 use App\Http\Controllers\Admin\PeriodeKuotaController;
+use App\Http\Controllers\Admin\VerifikasiLaporanController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Operator\LaporanNeracaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'publik'])->name('dashboard.publik');
@@ -44,4 +46,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('periode-kuota/create', [PeriodeKuotaController::class, 'create'])->name('periode-kuota.create');
     Route::post('periode-kuota', [PeriodeKuotaController::class, 'store'])->name('periode-kuota.store');
     Route::put('periode-kuota/{id}/tutup', [PeriodeKuotaController::class, 'tutup'])->name('periode-kuota.tutup');
+
+    Route::get('verifikasi-laporan', [VerifikasiLaporanController::class, 'index'])->name('verifikasi-laporan.index');
+    Route::get('verifikasi-laporan/{id}', [VerifikasiLaporanController::class, 'show'])->name('verifikasi-laporan.show');
+    Route::put('verifikasi-laporan/{id}/verify', [VerifikasiLaporanController::class, 'verify'])->name('verifikasi-laporan.verify');
+    Route::put('verifikasi-laporan/{id}/reject', [VerifikasiLaporanController::class, 'reject'])->name('verifikasi-laporan.reject');
+});
+
+Route::middleware(['auth', 'role:operator'])->prefix('operator')->name('operator.')->group(function () {
+    Route::resource('laporan-neraca', LaporanNeracaController::class)
+        ->parameters(['laporan-neraca' => 'laporanNeraca'])
+        ->only(['index', 'create', 'store', 'show']);
 });

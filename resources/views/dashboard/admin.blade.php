@@ -13,6 +13,7 @@
         <a href="{{ route('admin.kawasan.index') }}" class="list-group-item list-group-item-action">Kelola Kawasan</a>
         <a href="{{ route('admin.jalur-pengolahan.index') }}" class="list-group-item list-group-item-action">Kelola Jalur Pengolahan</a>
         <a href="{{ route('admin.periode-kuota.index') }}" class="list-group-item list-group-item-action">Kelola Periode Kuota</a>
+        <a href="{{ route('admin.verifikasi-laporan.index') }}" class="list-group-item list-group-item-action">Verifikasi Laporan Neraca</a>
     </div>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-3">
