@@ -8,6 +8,13 @@
     <p>Selamat datang, <strong>{{ $user->name }}</strong>.</p>
     <p>Peran Anda: <span class="badge bg-dark">{{ $user->role }}</span></p>
 
+    <h2 class="h5 mt-4 mb-2">Kelola Data Induk</h2>
+    <div class="list-group mb-4" style="max-width: 24rem;">
+        <a href="{{ route('admin.kawasan.index') }}" class="list-group-item list-group-item-action">Kelola Kawasan</a>
+        <a href="{{ route('admin.jalur-pengolahan.index') }}" class="list-group-item list-group-item-action">Kelola Jalur Pengolahan</a>
+        <a href="{{ route('admin.periode-kuota.index') }}" class="list-group-item list-group-item-action">Kelola Periode Kuota</a>
+    </div>
+
     <form method="POST" action="{{ route('logout') }}" class="mt-3">
         @csrf
         <button type="submit" class="btn btn-outline-danger btn-sm">Keluar</button>

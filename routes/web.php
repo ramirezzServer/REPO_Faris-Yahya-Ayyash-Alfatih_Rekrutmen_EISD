@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\JalurPengolahanController;
+use App\Http\Controllers\Admin\KawasanController;
+use App\Http\Controllers\Admin\PeriodeKuotaController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
@@ -27,4 +30,18 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/warga/dashboard', [DashboardController::class, 'warga'])
         ->middleware('role:warga')->name('dashboard.warga');
+});
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('kawasan', KawasanController::class)
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+    Route::resource('jalur-pengolahan', JalurPengolahanController::class)
+        ->parameters(['jalur-pengolahan' => 'jalurPengolahan'])
+        ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+
+    Route::get('periode-kuota', [PeriodeKuotaController::class, 'index'])->name('periode-kuota.index');
+    Route::get('periode-kuota/create', [PeriodeKuotaController::class, 'create'])->name('periode-kuota.create');
+    Route::post('periode-kuota', [PeriodeKuotaController::class, 'store'])->name('periode-kuota.store');
+    Route::put('periode-kuota/{id}/tutup', [PeriodeKuotaController::class, 'tutup'])->name('periode-kuota.tutup');
 });
