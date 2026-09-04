@@ -6,12 +6,38 @@
 
     <title>@yield('title', 'SINERKA')</title>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ asset('vendor/bootstrap/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/sinerka.css') }}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('dashboard.publik') }}">SINERKA</a>
+    <nav class="navbar navbar-sinerka">
+        <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2 py-2">
+            <a class="navbar-brand mb-0" href="{{ route('dashboard.publik') }}">SINERKA</a>
+
+            <div class="d-flex align-items-center gap-2">
+                @auth
+                    @php
+                        $sinerkaLabelPeran = match (auth()->user()->role) {
+                            'admin' => 'Administrator',
+                            'operator' => 'Operator',
+                            'warga' => 'Warga',
+                            default => ucfirst(auth()->user()->role),
+                        };
+                    @endphp
+                    <span class="navbar-text-peran">
+                        {{ auth()->user()->name }} &middot; {{ $sinerkaLabelPeran }}
+                    </span>
+                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary">Dashboard</a>
+                    <form method="POST" action="{{ route('logout') }}" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Keluar</button>
+                    </form>
+                @endauth
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn-sm btn-outline-secondary">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn-sm btn-primary">Daftar</a>
+                @endguest
+            </div>
         </div>
     </nav>
 
@@ -41,7 +67,7 @@
         @yield('content')
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('vendor/bootstrap/bootstrap.bundle.min.js') }}"></script>
     @stack('scripts')
 </body>
 </html>

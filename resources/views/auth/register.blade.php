@@ -3,9 +3,9 @@
 @section('title', 'Daftar — SINERKA')
 
 @section('content')
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h1 class="h3 mb-4">Daftar Akun Warga</h1>
+    <div class="auth-layout">
+        <div class="auth-layout__form">
+            <h1 class="h1 mb-4">Daftar Akun Warga</h1>
 
             <form method="POST" action="{{ route('register') }}">
                 @csrf
@@ -54,6 +54,16 @@
                 <button type="submit" class="btn btn-primary">Daftar</button>
                 <a href="{{ route('login') }}" class="btn btn-link">Sudah punya akun? Masuk</a>
             </form>
+        </div>
+
+        <div class="auth-layout__blurb">
+            <h2 class="h4">Apa itu SINERKA?</h2>
+            <p class="measure">
+                SINERKA adalah sistem pencatatan neraca sampah Kota Bandung. Sebagai warga terdaftar,
+                Anda dapat melaporkan tumpukan sampah liar di kawasan Anda dan memantau status
+                kesiagaan kawasan &mdash; berapa kuota residu yang tersisa sebelum pengiriman ke TPA
+                Sarimukti dibatasi lebih ketat.
+            </p>
         </div>
     </div>
 @endsection
