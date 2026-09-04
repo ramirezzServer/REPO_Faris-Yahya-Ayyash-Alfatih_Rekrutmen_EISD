@@ -56,6 +56,20 @@ class UserSeeder extends Seeder
                 'role' => 'warga',
                 'kawasan_id' => $kawasan['KWS-004'],
             ],
+            [
+                'name' => 'Warga Sukamiskin',
+                'email' => 'warga3@sinerka.test',
+                'no_hp' => '081200000023',
+                'role' => 'warga',
+                'kawasan_id' => $kawasan['KWS-002'],
+            ],
+            [
+                'name' => 'Warga Belum Terdaftar Kawasan',
+                'email' => 'warga4@sinerka.test',
+                'no_hp' => '081200000024',
+                'role' => 'warga',
+                'kawasan_id' => null,
+            ],
         ];
 
         foreach ($users as $user) {

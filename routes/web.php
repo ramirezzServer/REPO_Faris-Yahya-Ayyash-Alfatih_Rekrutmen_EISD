@@ -8,6 +8,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Operator\LaporanNeracaController;
+use App\Http\Controllers\TindakLanjutTumpukanController;
+use App\Http\Controllers\Warga\LaporanTumpukanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [DashboardController::class, 'publik'])->name('dashboard.publik');
@@ -57,4 +59,16 @@ Route::middleware(['auth', 'role:operator'])->prefix('operator')->name('operator
     Route::resource('laporan-neraca', LaporanNeracaController::class)
         ->parameters(['laporan-neraca' => 'laporanNeraca'])
         ->only(['index', 'create', 'store', 'show']);
+});
+
+Route::middleware(['auth', 'role:warga'])->prefix('warga')->name('warga.')->group(function () {
+    Route::resource('laporan-tumpukan', LaporanTumpukanController::class)
+        ->parameters(['laporan-tumpukan' => 'laporanTumpukan'])
+        ->only(['index', 'create', 'store']);
+});
+
+Route::middleware(['auth', 'role:operator,admin'])->prefix('tindak-lanjut')->name('tindak-lanjut.')->group(function () {
+    Route::get('/', [TindakLanjutTumpukanController::class, 'index'])->name('index');
+    Route::get('/{id}', [TindakLanjutTumpukanController::class, 'show'])->name('show');
+    Route::put('/{id}/status', [TindakLanjutTumpukanController::class, 'updateStatus'])->name('update-status');
 });

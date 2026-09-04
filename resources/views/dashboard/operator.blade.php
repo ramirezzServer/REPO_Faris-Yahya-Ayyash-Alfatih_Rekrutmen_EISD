@@ -11,6 +11,7 @@
     <h2 class="h5 mt-4 mb-2">Menu</h2>
     <div class="list-group mb-4" style="max-width: 24rem;">
         <a href="{{ route('operator.laporan-neraca.index') }}" class="list-group-item list-group-item-action">Laporan Neraca Kawasan</a>
+        <a href="{{ route('tindak-lanjut.index') }}" class="list-group-item list-group-item-action">Tindak Lanjut Tumpukan</a>
     </div>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-3">

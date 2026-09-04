@@ -14,6 +14,7 @@
         <a href="{{ route('admin.jalur-pengolahan.index') }}" class="list-group-item list-group-item-action">Kelola Jalur Pengolahan</a>
         <a href="{{ route('admin.periode-kuota.index') }}" class="list-group-item list-group-item-action">Kelola Periode Kuota</a>
         <a href="{{ route('admin.verifikasi-laporan.index') }}" class="list-group-item list-group-item-action">Verifikasi Laporan Neraca</a>
+        <a href="{{ route('tindak-lanjut.index') }}" class="list-group-item list-group-item-action">Tindak Lanjut Tumpukan</a>
     </div>
 
     <form method="POST" action="{{ route('logout') }}" class="mt-3">
