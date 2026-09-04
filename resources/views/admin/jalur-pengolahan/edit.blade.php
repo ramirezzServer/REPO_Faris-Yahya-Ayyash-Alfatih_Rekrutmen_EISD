@@ -1,19 +1,21 @@
 @extends('layouts.app')
 
-@section('title', 'Ubah Jalur Pengolahan — SINERKA')
+@section('judul', 'Ubah Jalur Pengolahan')
 
 @section('content')
-    <h1 class="h4 mb-4">Ubah Jalur Pengolahan: {{ $jalurPengolahan->nama }}</h1>
+    <h1 class="mb-6 text-lg font-semibold text-tinta">Ubah Jalur Pengolahan: {{ $jalurPengolahan->nama }}</h1>
 
-    <div class="col-md-6">
+    <div class="max-w-xl">
         <form method="POST" action="{{ route('admin.jalur-pengolahan.update', $jalurPengolahan) }}"
-            enctype="multipart/form-data">
+            enctype="multipart/form-data" class="space-y-4">
             @csrf
             @method('PUT')
             @include('admin.jalur-pengolahan._form')
 
-            <button type="submit" class="btn btn-primary">Perbarui</button>
-            <a href="{{ route('admin.jalur-pengolahan.index') }}" class="btn btn-outline-secondary">Batal</a>
+            <div class="flex items-center gap-3 pt-2">
+                <button type="submit" class="rounded-md bg-aksi px-4 py-2 text-sm font-medium text-white hover:opacity-90">Perbarui</button>
+                <a href="{{ route('admin.jalur-pengolahan.index') }}" class="rounded-md border border-garis px-4 py-2 text-sm font-medium text-tinta hover:bg-latar">Batal</a>
+            </div>
         </form>
     </div>
 @endsection

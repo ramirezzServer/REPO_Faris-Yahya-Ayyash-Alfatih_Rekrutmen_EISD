@@ -1,31 +1,38 @@
-@php($k = $kawasan ?? null)
+@php
+    $k = $kawasan ?? null;
+@endphp
 
-<div class="mb-3">
-    <label class="form-label" for="kode_kawasan">Kode Kawasan</label>
+<div>
+    <label class="mb-1 block text-sm font-medium text-tinta" for="kode_kawasan">Kode Kawasan</label>
     <input type="text" id="kode_kawasan" name="kode_kawasan" maxlength="20"
-        class="form-control" value="{{ old('kode_kawasan', $k?->kode_kawasan) }}" required>
+        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+        value="{{ old('kode_kawasan', $k?->kode_kawasan) }}" required>
 </div>
 
-<div class="mb-3">
-    <label class="form-label" for="nama_rw">Nama RW</label>
+<div>
+    <label class="mb-1 block text-sm font-medium text-tinta" for="nama_rw">Nama RW</label>
     <input type="text" id="nama_rw" name="nama_rw" maxlength="100"
-        class="form-control" value="{{ old('nama_rw', $k?->nama_rw) }}" required>
+        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+        value="{{ old('nama_rw', $k?->nama_rw) }}" required>
 </div>
 
-<div class="mb-3">
-    <label class="form-label" for="kelurahan">Kelurahan</label>
+<div>
+    <label class="mb-1 block text-sm font-medium text-tinta" for="kelurahan">Kelurahan</label>
     <input type="text" id="kelurahan" name="kelurahan" maxlength="100"
-        class="form-control" value="{{ old('kelurahan', $k?->kelurahan) }}" required>
+        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+        value="{{ old('kelurahan', $k?->kelurahan) }}" required>
 </div>
 
-<div class="mb-3">
-    <label class="form-label" for="kecamatan">Kecamatan</label>
+<div>
+    <label class="mb-1 block text-sm font-medium text-tinta" for="kecamatan">Kecamatan</label>
     <input type="text" id="kecamatan" name="kecamatan" maxlength="100"
-        class="form-control" value="{{ old('kecamatan', $k?->kecamatan) }}" required>
+        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+        value="{{ old('kecamatan', $k?->kecamatan) }}" required>
 </div>
 
-<div class="mb-3">
-    <label class="form-label" for="jumlah_kk">Jumlah KK</label>
+<div>
+    <label class="mb-1 block text-sm font-medium text-tinta" for="jumlah_kk">Jumlah KK</label>
     <input type="number" id="jumlah_kk" name="jumlah_kk" min="0"
-        class="form-control" value="{{ old('jumlah_kk', $k?->jumlah_kk) }}" required>
+        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+        value="{{ old('jumlah_kk', $k?->jumlah_kk) }}" required>
 </div>

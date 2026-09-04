@@ -1,80 +1,87 @@
 @extends('layouts.app')
 
-@section('title', 'Tinjau Laporan Neraca — SINERKA')
+@section('judul', 'Tinjau Laporan Neraca')
 
 @section('content')
-    @php($badge = match ($laporan->status) {
-        'menunggu' => 'bg-warning text-dark',
-        'terverifikasi' => 'bg-success',
-        'ditolak' => 'bg-danger',
-        default => 'bg-secondary',
-    })
+    @php
+        $badge = match ($laporan->status) {
+            'menunggu' => 'border-garis text-lembut',
+            'terverifikasi' => 'border-aman/40 bg-aman/10 text-aman',
+            'ditolak' => 'border-kritis/40 bg-kritis/10 text-kritis',
+            default => 'border-garis text-lembut',
+        };
+    @endphp
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h4 mb-0">Tinjau Laporan — {{ $laporan->kawasan->kode_kawasan ?? '-' }}, {{ $laporan->tanggal_laporan->format('d M Y') }}</h1>
-        <a href="{{ route('admin.verifikasi-laporan.index') }}" class="btn btn-sm btn-outline-secondary">Kembali</a>
+    <div class="mb-4 flex items-center justify-between">
+        <h1 class="text-lg font-semibold text-tinta">Tinjau Laporan — {{ $laporan->kawasan->kode_kawasan ?? '-' }}, {{ $laporan->tanggal_laporan->format('d M Y') }}</h1>
+        <a href="{{ route('admin.verifikasi-laporan.index') }}" class="rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
     </div>
 
-    <dl class="row">
-        <dt class="col-sm-3">Operator</dt>
-        <dd class="col-sm-9">{{ $laporan->operator->name ?? '-' }}</dd>
-        <dt class="col-sm-3">Status</dt>
-        <dd class="col-sm-9"><span class="badge {{ $badge }}">{{ $laporan->status }}</span></dd>
-        <dt class="col-sm-3">Timbulan</dt>
-        <dd class="col-sm-9">{{ number_format((float) $laporan->timbulan_kg, 2) }} kg</dd>
-        <dt class="col-sm-3">Total Diolah</dt>
-        <dd class="col-sm-9">{{ number_format((float) $laporan->total_diolah_kg, 2) }} kg</dd>
-        <dt class="col-sm-3">Residu Laporan</dt>
-        <dd class="col-sm-9"><strong>{{ number_format((float) $laporan->residu_kg, 2) }} kg</strong></dd>
-        <dt class="col-sm-3">Sisa Kuota Periode</dt>
-        <dd class="col-sm-9"><strong>{{ number_format($sisaKuota, 2) }} kg</strong></dd>
-        @if ($laporan->catatan)
-            <dt class="col-sm-3">Catatan</dt>
-            <dd class="col-sm-9">{{ $laporan->catatan }}</dd>
-        @endif
-    </dl>
+    <div class="mb-6 rounded-lg border border-garis bg-permukaan p-6">
+        <dl class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-[10rem_1fr]">
+            <dt class="text-sm font-medium text-lembut">Operator</dt>
+            <dd class="text-sm text-tinta">{{ $laporan->operator->name ?? '-' }}</dd>
+            <dt class="text-sm font-medium text-lembut">Status</dt>
+            <dd class="text-sm text-tinta"><span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium {{ $badge }}">{{ $laporan->status }}</span></dd>
+            <dt class="text-sm font-medium text-lembut">Timbulan</dt>
+            <dd class="text-sm text-tinta">{{ number_format((float) $laporan->timbulan_kg, 2) }} kg</dd>
+            <dt class="text-sm font-medium text-lembut">Total Diolah</dt>
+            <dd class="text-sm text-tinta">{{ number_format((float) $laporan->total_diolah_kg, 2) }} kg</dd>
+            <dt class="text-sm font-medium text-lembut">Residu Laporan</dt>
+            <dd class="text-sm text-tinta"><strong>{{ number_format((float) $laporan->residu_kg, 2) }} kg</strong></dd>
+            <dt class="text-sm font-medium text-lembut">Sisa Kuota Periode</dt>
+            <dd class="text-sm text-tinta"><strong>{{ number_format($sisaKuota, 2) }} kg</strong></dd>
+            @if ($laporan->catatan)
+                <dt class="text-sm font-medium text-lembut">Catatan</dt>
+                <dd class="text-sm text-tinta">{{ $laporan->catatan }}</dd>
+            @endif
+        </dl>
+    </div>
 
-    <h2 class="h6 mt-3">Uraian Tonase per Jalur</h2>
-    <div class="table-responsive">
-        <table class="table table-striped align-middle">
-            <thead>
-                <tr>
-                    <th>Jalur Pengolahan</th>
-                    <th class="text-end">Tonase (kg)</th>
-                    <th class="text-end">Faktor Emisi CO<sub>2</sub> (saat lapor)</th>
-                    <th>Keterangan</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($laporan->jalurPengolahan as $jalur)
-                    <tr>
-                        <td>{{ $jalur->nama }}</td>
-                        <td class="text-end">{{ number_format((float) $jalur->pivot->tonase_kg, 2) }}</td>
-                        <td class="text-end">{{ $jalur->pivot->faktor_emisi_saat_lapor }}</td>
-                        <td>{{ $jalur->pivot->keterangan ?? '-' }}</td>
+    <h2 class="mb-2 text-sm font-semibold text-lembut">Uraian Tonase per Jalur</h2>
+    <div class="mb-6 overflow-hidden rounded-lg border border-garis bg-permukaan">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-garis text-left text-lembut">
+                        <th class="px-4 py-2 font-medium">Jalur Pengolahan</th>
+                        <th class="px-4 py-2 text-right font-medium">Tonase (kg)</th>
+                        <th class="px-4 py-2 text-right font-medium">Faktor Emisi CO<sub>2</sub> (saat lapor)</th>
+                        <th class="px-4 py-2 font-medium">Keterangan</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach ($laporan->jalurPengolahan as $jalur)
+                        <tr class="border-b border-garis last:border-0">
+                            <td class="px-4 py-3">{{ $jalur->nama }}</td>
+                            <td class="px-4 py-3 text-right">{{ number_format((float) $jalur->pivot->tonase_kg, 2) }}</td>
+                            <td class="px-4 py-3 text-right">{{ $jalur->pivot->faktor_emisi_saat_lapor }}</td>
+                            <td class="px-4 py-3">{{ $jalur->pivot->keterangan ?? '-' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 
     @if ($laporan->status === 'menunggu')
-        <div class="d-flex gap-4 mt-4">
+        <div class="flex flex-wrap gap-8">
             <form method="POST" action="{{ route('admin.verifikasi-laporan.verify', $laporan->id) }}"
                 onsubmit="return confirm('Verifikasi laporan ini?')">
                 @csrf
                 @method('PUT')
-                <button type="submit" class="btn btn-success">Verifikasi</button>
+                <button type="submit" class="rounded-md bg-aman px-4 py-2 text-sm font-medium text-white hover:opacity-90">Verifikasi</button>
             </form>
 
-            <form method="POST" action="{{ route('admin.verifikasi-laporan.reject', $laporan->id) }}" style="max-width: 30rem;">
+            <form method="POST" action="{{ route('admin.verifikasi-laporan.reject', $laporan->id) }}" class="max-w-md flex-1">
                 @csrf
                 @method('PUT')
                 <div class="mb-2">
-                    <label class="form-label" for="alasan">Alasan penolakan</label>
-                    <textarea id="alasan" name="alasan" rows="2" maxlength="500" class="form-control" required>{{ old('alasan') }}</textarea>
+                    <label class="mb-1 block text-sm font-medium text-tinta" for="alasan">Alasan penolakan</label>
+                    <textarea id="alasan" name="alasan" rows="2" maxlength="500"
+                        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30" required>{{ old('alasan') }}</textarea>
                 </div>
-                <button type="submit" class="btn btn-danger">Tolak</button>
+                <button type="submit" class="rounded-md bg-kritis px-4 py-2 text-sm font-medium text-white hover:opacity-90">Tolak</button>
             </form>
         </div>
     @endif

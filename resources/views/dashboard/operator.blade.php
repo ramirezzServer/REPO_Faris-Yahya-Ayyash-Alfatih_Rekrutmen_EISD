@@ -1,21 +1,22 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard Operator — SINERKA')
+@section('judul', 'Dashboard Operator')
 
 @section('content')
-    <h1 class="h3 mb-3">Dashboard Operator</h1>
+    <p class="text-tinta">Selamat datang, <strong>{{ $user->name }}</strong>.</p>
+    <p class="mt-1 text-tinta">
+        Peran Anda:
+        <span class="inline-flex items-center rounded-md bg-tinta px-2 py-0.5 text-xs font-medium text-white">{{ $user->role }}</span>
+    </p>
 
-    <p>Selamat datang, <strong>{{ $user->name }}</strong>.</p>
-    <p>Peran Anda: <span class="badge bg-dark">{{ $user->role }}</span></p>
-
-    <h2 class="h5 mt-4 mb-2">Menu</h2>
-    <div class="list-group mb-4" style="max-width: 24rem;">
-        <a href="{{ route('operator.laporan-neraca.index') }}" class="list-group-item list-group-item-action">Laporan Neraca Kawasan</a>
-        <a href="{{ route('tindak-lanjut.index') }}" class="list-group-item list-group-item-action">Tindak Lanjut Tumpukan</a>
+    <h2 class="mb-2 mt-6 text-sm font-semibold text-lembut">Menu</h2>
+    <div class="max-w-sm divide-y divide-garis overflow-hidden rounded-lg border border-garis bg-permukaan">
+        <a href="{{ route('operator.laporan-neraca.index') }}" class="block px-4 py-3 text-sm font-medium text-tinta hover:bg-latar">Laporan Neraca Kawasan</a>
+        <a href="{{ route('tindak-lanjut.index') }}" class="block px-4 py-3 text-sm font-medium text-tinta hover:bg-latar">Tindak Lanjut Tumpukan</a>
     </div>
 
-    <form method="POST" action="{{ route('logout') }}" class="mt-3">
+    <form method="POST" action="{{ route('logout') }}" class="mt-6">
         @csrf
-        <button type="submit" class="btn btn-outline-danger btn-sm">Keluar</button>
+        <button type="submit" class="rounded-md border border-kritis/40 px-3 py-1.5 text-sm font-medium text-kritis hover:bg-kritis/10">Keluar</button>
     </form>
 @endsection

@@ -1,0 +1,58 @@
+/*
+ * SINERKA — Sistem Desain (Tailwind CLI, statis, tanpa build step di server)
+ * Sumber: resources/css/tailwind.css → dibangun ke public/css/app.css lewat
+ * `npm run build:css`. Berkas keluaran WAJIB ikut di-commit.
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   @font-face — Plus Jakarta Sans (self-hosted, public/fonts/)
+   ============================================================ */
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-400.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-500.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-600.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url('../fonts/plus-jakarta-sans-800.woff2') format('woff2');
+}
+
+@layer base {
+    body {
+        @apply bg-latar text-tinta font-sans;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+@layer components {
+    /* Angka besar (hero, angka-strip) — selalu tabular agar rapi berjajar */
+    .num {
+        font-variant-numeric: tabular-nums;
+    }
+}

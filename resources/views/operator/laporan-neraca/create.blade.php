@@ -1,93 +1,100 @@
 @extends('layouts.app')
 
-@section('title', 'Buat Laporan Neraca — SINERKA')
+@section('judul', 'Buat Laporan Neraca')
 
 @section('content')
-    <h1 class="h4 mb-3">Buat Laporan Neraca</h1>
+    <h1 class="mb-4 text-lg font-semibold text-tinta">Buat Laporan Neraca</h1>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h2 class="h6 text-muted">Informasi Kuota</h2>
-            <div class="row">
-                <div class="col-sm-3"><strong>Kawasan</strong><br>{{ $kawasan->kode_kawasan }} — {{ $kawasan->nama_rw }}</div>
-                <div class="col-sm-3"><strong>Periode Aktif</strong><br>{{ $periode->tanggal_mulai->format('d M Y') }} &ndash; {{ $periode->tanggal_selesai->format('d M Y') }}</div>
-                <div class="col-sm-3"><strong>Sisa Kuota Residu</strong><br>{{ number_format($sisaKuota, 2) }} kg</div>
-                <div class="col-sm-3"><strong>Persentase Sisa</strong><br>{{ number_format($persentaseSisa, 1) }}%</div>
-            </div>
+    <div class="mb-4 rounded-lg border border-garis bg-permukaan p-6">
+        <h2 class="mb-3 text-sm font-semibold text-lembut">Informasi Kuota</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
+            <div><strong class="text-tinta">Kawasan</strong><br>{{ $kawasan->kode_kawasan }} — {{ $kawasan->nama_rw }}</div>
+            <div><strong class="text-tinta">Periode Aktif</strong><br>{{ $periode->tanggal_mulai->format('d M Y') }} &ndash; {{ $periode->tanggal_selesai->format('d M Y') }}</div>
+            <div><strong class="text-tinta">Sisa Kuota Residu</strong><br>{{ number_format($sisaKuota, 2) }} kg</div>
+            <div><strong class="text-tinta">Persentase Sisa</strong><br>{{ number_format($persentaseSisa, 1) }}%</div>
         </div>
     </div>
 
     @if ($kuotaMenipis)
-        <div class="alert alert-warning" role="alert">
+        <div class="mb-4 rounded-md border border-waspada/40 bg-waspada/10 p-4 text-sm text-tinta" role="alert">
             Kuota residu kawasan Anda menipis (di bawah 40%). Utamakan pengolahan agar residu tetap dalam kuota.
         </div>
     @endif
 
-    @php($barisLama = old('uraian', [['jalur_pengolahan_id' => '', 'tonase_kg' => '', 'keterangan' => '']]))
+    @php
+        $barisLama = old('uraian', [['jalur_pengolahan_id' => '', 'tonase_kg' => '', 'keterangan' => '']]);
+    @endphp
 
     <form method="POST" action="{{ route('operator.laporan-neraca.store') }}">
         @csrf
 
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <label class="form-label" for="tanggal_laporan">Tanggal Laporan</label>
-                <input type="date" id="tanggal_laporan" name="tanggal_laporan" class="form-control"
+        <div class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+                <label class="mb-1 block text-sm font-medium text-tinta" for="tanggal_laporan">Tanggal Laporan</label>
+                <input type="date" id="tanggal_laporan" name="tanggal_laporan"
+                    class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
                     value="{{ old('tanggal_laporan') }}" max="{{ now()->toDateString() }}" required>
             </div>
-            <div class="col-md-4 mb-3">
-                <label class="form-label" for="timbulan_kg">Timbulan Sampah (kg)</label>
-                <input type="number" id="timbulan_kg" name="timbulan_kg" class="form-control"
+            <div>
+                <label class="mb-1 block text-sm font-medium text-tinta" for="timbulan_kg">Timbulan Sampah (kg)</label>
+                <input type="number" id="timbulan_kg" name="timbulan_kg"
+                    class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
                     step="0.01" min="0" value="{{ old('timbulan_kg') }}" required>
             </div>
         </div>
 
-        <h2 class="h6 mt-2">Uraian Tonase per Jalur Pengolahan</h2>
-        <div class="table-responsive">
-            <table class="table align-middle" id="uraian-table">
-                <thead>
-                    <tr>
-                        <th style="width: 40%">Jalur Pengolahan</th>
-                        <th style="width: 20%">Tonase (kg)</th>
-                        <th style="width: 30%">Keterangan</th>
-                        <th style="width: 10%"></th>
-                    </tr>
-                </thead>
-                <tbody id="uraian-body">
-                    @foreach ($barisLama as $i => $baris)
-                        <tr>
-                            <td>
-                                <select name="uraian[{{ $i }}][jalur_pengolahan_id]" class="form-select" required>
-                                    <option value="">-- Pilih Jalur --</option>
-                                    @foreach ($jalurList as $jalur)
-                                        <option value="{{ $jalur->id }}"
-                                            @selected(($baris['jalur_pengolahan_id'] ?? '') == $jalur->id)>
-                                            {{ $jalur->nama }} ({{ $jalur->kategori }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </td>
-                            <td>
-                                <input type="number" step="0.01" min="0" class="form-control"
-                                    name="uraian[{{ $i }}][tonase_kg]" value="{{ $baris['tonase_kg'] ?? '' }}" required>
-                            </td>
-                            <td>
-                                <input type="text" maxlength="255" class="form-control"
-                                    name="uraian[{{ $i }}][keterangan]" value="{{ $baris['keterangan'] ?? '' }}">
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-outline-danger btn-hapus-baris">Hapus</button>
-                            </td>
+        <h2 class="mb-2 mt-2 text-sm font-semibold text-lembut">Uraian Tonase per Jalur Pengolahan</h2>
+        <div class="mb-3 overflow-hidden rounded-lg border border-garis bg-permukaan">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm" id="uraian-table">
+                    <thead>
+                        <tr class="border-b border-garis text-left text-lembut">
+                            <th class="px-4 py-2 font-medium" style="width: 40%">Jalur Pengolahan</th>
+                            <th class="px-4 py-2 font-medium" style="width: 20%">Tonase (kg)</th>
+                            <th class="px-4 py-2 font-medium" style="width: 30%">Keterangan</th>
+                            <th class="px-4 py-2 font-medium" style="width: 10%"></th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="uraian-body">
+                        @foreach ($barisLama as $i => $baris)
+                            <tr class="border-b border-garis last:border-0">
+                                <td class="px-4 py-3">
+                                    <select name="uraian[{{ $i }}][jalur_pengolahan_id]"
+                                        class="w-full rounded-md border border-garis bg-white px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30" required>
+                                        <option value="">-- Pilih Jalur --</option>
+                                        @foreach ($jalurList as $jalur)
+                                            <option value="{{ $jalur->id }}"
+                                                @selected(($baris['jalur_pengolahan_id'] ?? '') == $jalur->id)>
+                                                {{ $jalur->nama }} ({{ $jalur->kategori }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <input type="number" step="0.01" min="0"
+                                        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+                                        name="uraian[{{ $i }}][tonase_kg]" value="{{ $baris['tonase_kg'] ?? '' }}" required>
+                                </td>
+                                <td class="px-4 py-3">
+                                    <input type="text" maxlength="255"
+                                        class="w-full rounded-md border border-garis px-3 py-2 focus:border-aksi focus:outline-none focus:ring-2 focus:ring-aksi/30"
+                                        name="uraian[{{ $i }}][keterangan]" value="{{ $baris['keterangan'] ?? '' }}">
+                                </td>
+                                <td class="px-4 py-3">
+                                    <button type="button" class="btn-hapus-baris rounded-md border border-kritis/40 px-3 py-1.5 text-sm font-medium text-kritis hover:bg-kritis/10">Hapus</button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <button type="button" id="tambah-baris" class="btn btn-sm btn-outline-secondary mb-3">Tambah Baris</button>
+        <button type="button" id="tambah-baris" class="mb-4 rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Tambah Baris</button>
 
-        <div>
-            <button type="submit" class="btn btn-primary">Simpan Laporan</button>
-            <a href="{{ route('operator.laporan-neraca.index') }}" class="btn btn-outline-secondary">Batal</a>
+        <div class="flex items-center gap-3">
+            <button type="submit" class="rounded-md bg-aksi px-4 py-2 text-sm font-medium text-white hover:opacity-90">Simpan Laporan</button>
+            <a href="{{ route('operator.laporan-neraca.index') }}" class="rounded-md border border-garis px-4 py-2 text-sm font-medium text-tinta hover:bg-latar">Batal</a>
         </div>
     </form>
 @endsection
