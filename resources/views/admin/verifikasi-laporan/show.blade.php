@@ -12,9 +12,12 @@
         };
     @endphp
 
-    <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-tinta">Tinjau Laporan — {{ $laporan->kawasan->kode_kawasan ?? '-' }}, {{ $laporan->tanggal_laporan->format('d M Y') }}</h1>
-        <a href="{{ route('admin.verifikasi-laporan.index') }}" class="rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-semibold text-tinta">Tinjau Laporan — {{ $laporan->kawasan->kode_kawasan ?? '-' }}, {{ $laporan->tanggal_laporan->format('d M Y') }}</h1>
+            <p class="mt-1 text-sm text-lembut">Periksa uraian tonase, lalu verifikasi atau tolak laporan ini.</p>
+        </div>
+        <a href="{{ route('admin.verifikasi-laporan.index') }}" class="rounded-md border border-garis px-4 py-2 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
     </div>
 
     <div class="mb-6 rounded-lg border border-garis bg-permukaan p-6">
@@ -24,13 +27,13 @@
             <dt class="text-sm font-medium text-lembut">Status</dt>
             <dd class="text-sm text-tinta"><span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium {{ $badge }}">{{ $laporan->status }}</span></dd>
             <dt class="text-sm font-medium text-lembut">Timbulan</dt>
-            <dd class="text-sm text-tinta">{{ number_format((float) $laporan->timbulan_kg, 2) }} kg</dd>
+            <dd class="num text-sm tabular-nums text-tinta">{{ number_format((float) $laporan->timbulan_kg, 2) }} kg</dd>
             <dt class="text-sm font-medium text-lembut">Total Diolah</dt>
-            <dd class="text-sm text-tinta">{{ number_format((float) $laporan->total_diolah_kg, 2) }} kg</dd>
+            <dd class="num text-sm tabular-nums text-tinta">{{ number_format((float) $laporan->total_diolah_kg, 2) }} kg</dd>
             <dt class="text-sm font-medium text-lembut">Residu Laporan</dt>
-            <dd class="text-sm text-tinta"><strong>{{ number_format((float) $laporan->residu_kg, 2) }} kg</strong></dd>
+            <dd class="num text-sm tabular-nums text-tinta"><strong>{{ number_format((float) $laporan->residu_kg, 2) }} kg</strong></dd>
             <dt class="text-sm font-medium text-lembut">Sisa Kuota Periode</dt>
-            <dd class="text-sm text-tinta"><strong>{{ number_format($sisaKuota, 2) }} kg</strong></dd>
+            <dd class="num text-sm tabular-nums text-tinta"><strong>{{ number_format($sisaKuota, 2) }} kg</strong></dd>
             @if ($laporan->catatan)
                 <dt class="text-sm font-medium text-lembut">Catatan</dt>
                 <dd class="text-sm text-tinta">{{ $laporan->catatan }}</dd>
@@ -42,7 +45,7 @@
     <div class="mb-6 overflow-hidden rounded-lg border border-garis bg-permukaan">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead>
+                <thead class="sticky top-0 z-10 bg-permukaan">
                     <tr class="border-b border-garis text-left text-lembut">
                         <th class="px-4 py-2 font-medium">Jalur Pengolahan</th>
                         <th class="px-4 py-2 text-right font-medium">Tonase (kg)</th>
@@ -52,10 +55,10 @@
                 </thead>
                 <tbody>
                     @foreach ($laporan->jalurPengolahan as $jalur)
-                        <tr class="border-b border-garis last:border-0">
+                        <tr class="border-b border-garis last:border-0 hover:bg-latar">
                             <td class="px-4 py-3">{{ $jalur->nama }}</td>
-                            <td class="px-4 py-3 text-right">{{ number_format((float) $jalur->pivot->tonase_kg, 2) }}</td>
-                            <td class="px-4 py-3 text-right">{{ $jalur->pivot->faktor_emisi_saat_lapor }}</td>
+                            <td class="num px-4 py-3 text-right tabular-nums">{{ number_format((float) $jalur->pivot->tonase_kg, 2) }}</td>
+                            <td class="num px-4 py-3 text-right tabular-nums">{{ $jalur->pivot->faktor_emisi_saat_lapor }}</td>
                             <td class="px-4 py-3">{{ $jalur->pivot->keterangan ?? '-' }}</td>
                         </tr>
                     @endforeach
@@ -67,13 +70,14 @@
     @if ($laporan->status === 'menunggu')
         <div class="flex flex-wrap gap-8">
             <form method="POST" action="{{ route('admin.verifikasi-laporan.verify', $laporan->id) }}"
-                onsubmit="return confirm('Verifikasi laporan ini?')">
+                onsubmit="return sinerkaKonfirmasi(this, 'Verifikasi laporan neraca {{ $laporan->kawasan->kode_kawasan ?? '-' }}, {{ $laporan->tanggal_laporan->format('d M Y') }}?')">
                 @csrf
                 @method('PUT')
                 <button type="submit" class="rounded-md bg-aman px-4 py-2 text-sm font-medium text-white hover:opacity-90">Verifikasi</button>
             </form>
 
-            <form method="POST" action="{{ route('admin.verifikasi-laporan.reject', $laporan->id) }}" class="max-w-md flex-1">
+            <form method="POST" action="{{ route('admin.verifikasi-laporan.reject', $laporan->id) }}" class="max-w-md flex-1"
+                onsubmit="return sinerkaKonfirmasi(this, 'Tolak laporan neraca {{ $laporan->kawasan->kode_kawasan ?? '-' }}, {{ $laporan->tanggal_laporan->format('d M Y') }}?')">
                 @csrf
                 @method('PUT')
                 <div class="mb-2">

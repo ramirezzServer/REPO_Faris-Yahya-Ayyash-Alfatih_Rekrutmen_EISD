@@ -112,6 +112,16 @@
         </div>
     </div>
 
+    <dialog id="sinerka-dialog-konfirmasi" class="rounded-lg border border-garis p-0 backdrop:bg-tinta/40">
+        <form method="dialog" class="max-w-sm p-6">
+            <p id="sinerka-dialog-pesan" class="text-sm text-tinta"></p>
+            <div class="mt-4 flex justify-end gap-3">
+                <button type="button" id="sinerka-dialog-batal" class="rounded-md border border-garis px-3 py-1.5 text-sm hover:bg-latar">Batal</button>
+                <button type="button" id="sinerka-dialog-lanjut" class="rounded-md bg-kritis px-3 py-1.5 text-sm font-medium text-white hover:opacity-90">Lanjutkan</button>
+            </div>
+        </form>
+    </dialog>
+
     @stack('scripts')
     <script>
         (function () {
@@ -138,6 +148,42 @@
                 backdrop.addEventListener('click', tutup);
             }
         })();
+
+        // Modal konfirmasi <dialog> — pengganti confirm() bawaan browser.
+        // Dipanggil dari onsubmit sebuah <form>: onsubmit="return sinerkaKonfirmasi(this, 'Pesan...?')"
+        function sinerkaKonfirmasi(form, pesan) {
+            var dialog = document.getElementById('sinerka-dialog-konfirmasi');
+            if (! dialog || typeof dialog.showModal !== 'function') {
+                return confirm(pesan);
+            }
+
+            document.getElementById('sinerka-dialog-pesan').textContent = pesan;
+            dialog.showModal();
+
+            var tombolLanjut = document.getElementById('sinerka-dialog-lanjut');
+            var tombolBatal = document.getElementById('sinerka-dialog-batal');
+
+            function bersihkan() {
+                tombolLanjut.removeEventListener('click', onLanjut);
+                tombolBatal.removeEventListener('click', onBatal);
+            }
+
+            function onLanjut() {
+                bersihkan();
+                dialog.close();
+                form.submit();
+            }
+
+            function onBatal() {
+                bersihkan();
+                dialog.close();
+            }
+
+            tombolLanjut.addEventListener('click', onLanjut);
+            tombolBatal.addEventListener('click', onBatal);
+
+            return false;
+        }
     </script>
 </body>
 </html>

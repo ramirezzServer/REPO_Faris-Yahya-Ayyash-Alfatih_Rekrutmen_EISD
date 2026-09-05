@@ -3,19 +3,99 @@
 @section('judul', 'Dashboard Warga')
 
 @section('content')
-    <p class="text-tinta">Selamat datang, <strong>{{ $user->name }}</strong>.</p>
-    <p class="mt-1 text-tinta">
-        Peran Anda:
-        <span class="inline-flex items-center rounded-md bg-tinta px-2 py-0.5 text-xs font-medium text-white">{{ $user->role }}</span>
-    </p>
+    @if (! $kawasan)
+        <div class="rounded-lg border border-garis bg-permukaan p-6 text-sm text-tinta">
+            Akun Anda belum terhubung ke kawasan mana pun. Hubungi admin untuk menghubungkan akun Anda ke sebuah kawasan.
+        </div>
+    @else
+        <div class="rounded-lg border border-garis bg-permukaan p-6">
+            <p class="mb-4 text-sm font-semibold text-lembut">Status Kesiagaan {{ $kawasan->kode_kawasan }} — {{ $kawasan->kelurahan }}</p>
 
-    <h2 class="mb-2 mt-6 text-sm font-semibold text-lembut">Menu</h2>
-    <div class="max-w-sm divide-y divide-garis overflow-hidden rounded-lg border border-garis bg-permukaan">
-        <a href="{{ route('warga.laporan-tumpukan.index') }}" class="block px-4 py-3 text-sm font-medium text-tinta hover:bg-latar">Laporan Tumpukan Liar</a>
+            @if (! $periode)
+                <p class="text-sm text-lembut">Kawasan Anda belum memiliki periode kuota aktif.</p>
+            @else
+                @php
+                    $sinerkaPct = max(0, min(100, $periode->persentaseSisa()));
+                    $sinerkaR = 46;
+                    $sinerkaKel = 2 * pi() * $sinerkaR;
+                    $sinerkaOffset = $sinerkaKel - ($sinerkaPct / 100 * $sinerkaKel);
+                    $sinerkaWarna = match ($kawasan->status_siaga) {
+                        'aman' => ['#2F7A4F', 'border-aman/40 bg-aman/10 text-aman'],
+                        'waspada' => ['#B07A1E', 'border-waspada/40 bg-waspada/10 text-waspada'],
+                        'kritis' => ['#B3352B', 'border-kritis/40 bg-kritis/10 text-kritis'],
+                        default => ['#6E675C', 'border-garis text-lembut'],
+                    };
+                @endphp
+                <div class="flex items-center gap-6">
+                    <div class="relative flex h-[120px] w-[120px] shrink-0 items-center justify-center">
+                        <svg width="120" height="120" viewBox="0 0 120 120" class="-rotate-90">
+                            <circle cx="60" cy="60" r="{{ $sinerkaR }}" fill="none" stroke="#E7E0D4" stroke-width="12" />
+                            <circle cx="60" cy="60" r="{{ $sinerkaR }}" fill="none" stroke="{{ $sinerkaWarna[0] }}" stroke-width="12"
+                                stroke-linecap="round" stroke-dasharray="{{ $sinerkaKel }}" stroke-dashoffset="{{ $sinerkaOffset }}" />
+                        </svg>
+                        <span class="num absolute text-lg font-semibold text-tinta">{{ number_format($sinerkaPct, 0) }}%</span>
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium {{ $sinerkaWarna[1] }}">{{ ucfirst($kawasan->status_siaga) }}</span>
+                        <p class="mt-2 text-sm text-lembut">Sisa kuota residu: <span class="num tabular-nums text-tinta">{{ number_format($periode->sisaKuota(), 0) }} kg</span> dari {{ number_format((float) $periode->kuota_residu_kg, 0) }} kg</p>
+                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    <div class="mt-6 grid grid-cols-3 gap-4">
+        <div class="rounded-lg border border-garis bg-permukaan p-6 border-l-4 border-l-garis">
+            <div class="num text-2xl font-bold text-tinta">{{ $jumlahPerStatusTumpukan['baru'] }}</div>
+            <div class="text-xs text-lembut">Baru</div>
+        </div>
+        <div class="rounded-lg border border-garis bg-permukaan p-6 border-l-4 border-l-waspada">
+            <div class="num text-2xl font-bold text-tinta">{{ $jumlahPerStatusTumpukan['diproses'] }}</div>
+            <div class="text-xs text-lembut">Diproses</div>
+        </div>
+        <div class="rounded-lg border border-garis bg-permukaan p-6 border-l-4 border-l-aman">
+            <div class="num text-2xl font-bold text-tinta">{{ $jumlahPerStatusTumpukan['selesai'] }}</div>
+            <div class="text-xs text-lembut">Selesai</div>
+        </div>
     </div>
 
-    <form method="POST" action="{{ route('logout') }}" class="mt-6">
-        @csrf
-        <button type="submit" class="rounded-md border border-kritis/40 px-3 py-1.5 text-sm font-medium text-kritis hover:bg-kritis/10">Keluar</button>
-    </form>
+    <div class="mt-6">
+        <p class="mb-2 text-sm font-semibold text-lembut">Laporan Tumpukan Liar Terakhir</p>
+        <div class="overflow-hidden rounded-lg border border-garis bg-permukaan">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b border-garis text-left text-lembut">
+                            <th class="px-4 py-2 font-medium">Tanggal</th>
+                            <th class="px-4 py-2 font-medium">Lokasi</th>
+                            <th class="px-4 py-2 font-medium">Status</th>
+                            <th class="px-4 py-2 font-medium">Catatan Tindak Lanjut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($laporanTerakhir as $l)
+                            @php
+                                $badge = match ($l->status) {
+                                    'baru' => 'border-garis text-lembut',
+                                    'diproses' => 'border-waspada/40 bg-waspada/10 text-waspada',
+                                    'selesai' => 'border-aman/40 bg-aman/10 text-aman',
+                                    default => 'border-garis text-lembut',
+                                };
+                            @endphp
+                            <tr class="border-b border-garis last:border-0">
+                                <td class="px-4 py-3">{{ $l->created_at->format('d M Y') }}</td>
+                                <td class="px-4 py-3">{{ $l->lokasi }}</td>
+                                <td class="px-4 py-3"><span class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium {{ $badge }}">{{ $l->status }}</span></td>
+                                <td class="px-4 py-3">{{ $l->catatan_tindak_lanjut ?? '—' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-6 text-center text-lembut">Anda belum pernah melaporkan tumpukan liar.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 @endsection
