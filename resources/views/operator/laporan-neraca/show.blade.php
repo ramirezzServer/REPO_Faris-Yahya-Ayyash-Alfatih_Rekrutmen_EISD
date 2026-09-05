@@ -12,9 +12,12 @@
         };
     @endphp
 
-    <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-tinta">Laporan Neraca {{ $laporan->tanggal_laporan->format('d M Y') }}</h1>
-        <a href="{{ route('operator.laporan-neraca.index') }}" class="rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-semibold text-tinta">Laporan Neraca {{ $laporan->tanggal_laporan->format('d M Y') }}</h1>
+            <p class="mt-1 text-sm text-lembut">Kawasan {{ $laporan->kawasan->kode_kawasan ?? '-' }}</p>
+        </div>
+        <a href="{{ route('operator.laporan-neraca.index') }}" class="rounded-md border border-garis px-4 py-2 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
     </div>
 
     <div class="mb-6 rounded-lg border border-garis bg-permukaan p-6">
@@ -45,9 +48,9 @@
 
     <h2 class="mb-2 text-sm font-semibold text-lembut">Uraian Tonase per Jalur</h2>
     <div class="overflow-hidden rounded-lg border border-garis bg-permukaan">
-        <div class="overflow-x-auto">
+        <div class="max-h-[50vh] overflow-auto">
             <table class="w-full text-sm">
-                <thead>
+                <thead class="sticky top-0 z-10 bg-permukaan">
                     <tr class="border-b border-garis text-left text-lembut">
                         <th class="px-4 py-2 font-medium">Jalur Pengolahan</th>
                         <th class="px-4 py-2 text-right font-medium">Tonase (kg)</th>

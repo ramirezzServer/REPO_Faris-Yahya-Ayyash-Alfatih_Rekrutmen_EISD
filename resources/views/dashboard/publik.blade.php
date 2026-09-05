@@ -60,6 +60,14 @@
             </p>
         </section>
 
+        {{-- Tren residu kota --}}
+        <section class="mx-auto max-w-6xl px-6 py-16 lg:px-8">
+            <h2 class="mb-6 text-2xl font-bold">Tren Residu Kota (14 Hari Terakhir)</h2>
+            <div class="rounded-lg border border-garis bg-permukaan p-6">
+                <x-grafik-garis :label="$trenResiduKota['label']" :nilai="$trenResiduKota['nilai']" satuan="kg" />
+            </div>
+        </section>
+
         {{-- Ringkasan --}}
         <section class="mx-auto max-w-6xl px-6 py-16 lg:px-8">
             <h2 class="mb-6 text-2xl font-bold">Ringkasan Kota</h2>

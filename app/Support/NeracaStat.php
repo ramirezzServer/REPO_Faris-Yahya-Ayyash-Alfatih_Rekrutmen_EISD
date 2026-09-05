@@ -4,6 +4,8 @@ namespace App\Support;
 
 use App\Models\Kawasan;
 use App\Models\LaporanNeraca;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -145,5 +147,153 @@ class NeracaStat
     public static function jumlahLaporanMenunggu(): int
     {
         return LaporanNeraca::where('status', 'menunggu')->count();
+    }
+
+    /**
+     * Empat method tren di bawah ini dipakai grafik SVG (komponen
+     * <x-grafik-garis>) di landing page dan ketiga dashboard. Catatan
+     * penting: rentang tanggalnya dihitung dari Carbon::today() saat method
+     * dipanggil (waktu request), sedangkan data demo (DemoLaporanSeeder)
+     * dibuat relatif terhadap "hari ini" saat seeding dijalankan. Selama
+     * aplikasi berjalan setelah seeding, jendela "N hari terakhir" ini akan
+     * berangsur bergeser melewati rentang 30 hari data demo — ini perilaku
+     * yang diharapkan (bukan bug); jalankan ulang `migrate:fresh --seed`
+     * untuk jendela tren yang segar sebelum sesi demo/QA.
+     */
+
+    /**
+     * @return array{label: array<int, string>, nilai: array<int, float>}
+     */
+    public static function trenResiduHarian(int $hari = 14, ?int $kawasanId = null): array
+    {
+        [$mulai, $akhir] = self::rentangTanggal($hari);
+
+        $peta = DB::table('laporan_neraca')
+            ->selectRaw('tanggal_laporan, SUM(residu_kg) AS total')
+            ->where('status', 'terverifikasi')
+            ->whereBetween('tanggal_laporan', [$mulai->toDateString(), $akhir->toDateString()])
+            ->when($kawasanId, fn ($q) => $q->where('kawasan_id', $kawasanId))
+            ->groupBy('tanggal_laporan')
+            ->pluck('total', 'tanggal_laporan');
+
+        return self::isiKosongHarian($hari, function (Carbon $tanggal) use ($peta) {
+            return (float) ($peta[$tanggal->toDateString()] ?? 0);
+        });
+    }
+
+    /**
+     * @return array{label: array<int, string>, nilai: array<int, float>}
+     */
+    public static function trenTimbulanHarian(int $hari = 14): array
+    {
+        [$mulai, $akhir] = self::rentangTanggal($hari);
+
+        $peta = DB::table('laporan_neraca')
+            ->selectRaw('tanggal_laporan, SUM(timbulan_kg) AS total')
+            ->where('status', 'terverifikasi')
+            ->whereBetween('tanggal_laporan', [$mulai->toDateString(), $akhir->toDateString()])
+            ->groupBy('tanggal_laporan')
+            ->pluck('total', 'tanggal_laporan');
+
+        return self::isiKosongHarian($hari, function (Carbon $tanggal) use ($peta) {
+            return (float) ($peta[$tanggal->toDateString()] ?? 0);
+        });
+    }
+
+    /**
+     * Rasio harian tonase terolah terhadap timbulan (persen), per kawasan
+     * bila $kawasanId diisi, atau kota-kota bila null.
+     *
+     * @return array{label: array<int, string>, nilai: array<int, float>}
+     */
+    public static function trenKemandirianHarian(int $hari = 14, ?int $kawasanId = null): array
+    {
+        [$mulai, $akhir] = self::rentangTanggal($hari);
+
+        $timbulan = DB::table('laporan_neraca')
+            ->selectRaw('tanggal_laporan, SUM(timbulan_kg) AS total')
+            ->where('status', 'terverifikasi')
+            ->whereBetween('tanggal_laporan', [$mulai->toDateString(), $akhir->toDateString()])
+            ->when($kawasanId, fn ($q) => $q->where('kawasan_id', $kawasanId))
+            ->groupBy('tanggal_laporan')
+            ->pluck('total', 'tanggal_laporan');
+
+        $terolah = DB::table('detail_pengolahan')
+            ->join('laporan_neraca', 'laporan_neraca.id', '=', 'detail_pengolahan.laporan_neraca_id')
+            ->selectRaw('laporan_neraca.tanggal_laporan, SUM(detail_pengolahan.tonase_kg) AS total')
+            ->where('laporan_neraca.status', 'terverifikasi')
+            ->whereBetween('laporan_neraca.tanggal_laporan', [$mulai->toDateString(), $akhir->toDateString()])
+            ->when($kawasanId, fn ($q) => $q->where('laporan_neraca.kawasan_id', $kawasanId))
+            ->groupBy('laporan_neraca.tanggal_laporan')
+            ->pluck('total', 'tanggal_laporan');
+
+        return self::isiKosongHarian($hari, function (Carbon $tanggal) use ($timbulan, $terolah) {
+            $t = (float) ($timbulan[$tanggal->toDateString()] ?? 0);
+            $o = (float) ($terolah[$tanggal->toDateString()] ?? 0);
+
+            return $t > 0 ? round($o / $t * 100, 1) : 0.0;
+        });
+    }
+
+    /**
+     * Laju pemakaian kuota tiap kawasan berperiode aktif, diurutkan dari
+     * persentase terpakai tertinggi (paling mendesak) ke terendah.
+     */
+    public static function lajuPemakaianKuota(): Collection
+    {
+        $terpakaiSub = DB::table('laporan_neraca')
+            ->selectRaw('periode_kuota_id, SUM(residu_kg) AS terpakai')
+            ->where('status', 'terverifikasi')
+            ->groupBy('periode_kuota_id');
+
+        return DB::table('periode_kuota')
+            ->join('kawasan', 'kawasan.id', '=', 'periode_kuota.kawasan_id')
+            ->leftJoinSub($terpakaiSub, 't', 't.periode_kuota_id', '=', 'periode_kuota.id')
+            ->where('periode_kuota.status', 'aktif')
+            ->orderByDesc('persentase_terpakai')
+            ->get([
+                'kawasan.kode_kawasan',
+                'kawasan.kelurahan',
+                'periode_kuota.kuota_residu_kg AS kuota',
+                DB::raw('COALESCE(t.terpakai, 0) AS terpakai'),
+                DB::raw('periode_kuota.kuota_residu_kg - COALESCE(t.terpakai, 0) AS sisa'),
+                DB::raw('CASE WHEN periode_kuota.kuota_residu_kg > 0
+                        THEN COALESCE(t.terpakai, 0) / periode_kuota.kuota_residu_kg * 100
+                        ELSE 0 END AS persentase_terpakai'),
+            ]);
+    }
+
+    /**
+     * @return array{0: Carbon, 1: Carbon} [$mulai, $akhir], keduanya inklusif.
+     */
+    private static function rentangTanggal(int $hari): array
+    {
+        $akhir = Carbon::today();
+        $mulai = $akhir->copy()->subDays($hari - 1);
+
+        return [$mulai, $akhir];
+    }
+
+    /**
+     * Bangun deret $hari titik data harian (label "d/m", tertua ke
+     * terbaru, berakhir hari ini), dipadatkan lewat $ambilNilai supaya
+     * hari tanpa data tetap muncul sebagai 0 (bukan celah kosong).
+     *
+     * @param  callable(Carbon): float  $ambilNilai
+     * @return array{label: array<int, string>, nilai: array<int, float>}
+     */
+    private static function isiKosongHarian(int $hari, callable $ambilNilai): array
+    {
+        [$mulai, $akhir] = self::rentangTanggal($hari);
+
+        $label = [];
+        $nilai = [];
+
+        foreach (CarbonPeriod::create($mulai, $akhir) as $tanggal) {
+            $label[] = $tanggal->format('d/m');
+            $nilai[] = $ambilNilai($tanggal);
+        }
+
+        return ['label' => $label, 'nilai' => $nilai];
     }
 }

@@ -22,6 +22,7 @@ class DashboardController extends Controller
         $kontribusiJalur = NeracaStat::kontribusiJalur();
         $peringkatKawasan = NeracaStat::peringkatKawasan();
         $adaData = NeracaStat::adaLaporanTerverifikasi();
+        $trenResiduKota = NeracaStat::trenResiduHarian(14);
 
         $pembagiBatang = $totalTerolah + $totalResidu;
         $persenTerolah = $pembagiBatang > 0 ? $totalTerolah / $pembagiBatang * 100 : 0;
@@ -41,6 +42,7 @@ class DashboardController extends Controller
             'persenTerolah',
             'persenResidu',
             'kontribusiMaks',
+            'trenResiduKota',
         ));
     }
 
@@ -74,6 +76,10 @@ class DashboardController extends Controller
 
         $jumlahTumpukanBaru = LaporanTumpukan::where('status', 'baru')->count();
 
+        $trenResiduKota = NeracaStat::trenResiduHarian(14);
+        $kuotaKota = (float) PeriodeKuota::where('status', 'aktif')->sum('kuota_residu_kg');
+        $lajuKuota = NeracaStat::lajuPemakaianKuota();
+
         return view('dashboard.admin', [
             'user' => auth()->user(),
             'jumlahMenunggu' => $jumlahMenunggu,
@@ -82,6 +88,9 @@ class DashboardController extends Controller
             'kawasanKritis' => $kawasanKritis,
             'periodeSegeraBerakhir' => $periodeSegeraBerakhir,
             'jumlahTumpukanBaru' => $jumlahTumpukanBaru,
+            'trenResiduKota' => $trenResiduKota,
+            'kuotaKota' => $kuotaKota,
+            'lajuKuota' => $lajuKuota,
         ]);
     }
 
@@ -108,6 +117,9 @@ class DashboardController extends Controller
             ? LaporanTumpukan::where('kawasan_id', $kawasan->id)->where('status', 'baru')->count()
             : 0;
 
+        $trenResiduKawasan = $kawasan ? NeracaStat::trenResiduHarian(14, $kawasan->id) : null;
+        $trenKemandirianKawasan = $kawasan ? NeracaStat::trenKemandirianHarian(14, $kawasan->id) : null;
+
         return view('dashboard.operator', [
             'user' => $user,
             'kawasan' => $kawasan,
@@ -115,6 +127,8 @@ class DashboardController extends Controller
             'sudahLaporHariIni' => $sudahLaporHariIni,
             'laporanTerakhir' => $laporanTerakhir,
             'jumlahTumpukanBaru' => $jumlahTumpukanBaru,
+            'trenResiduKawasan' => $trenResiduKawasan,
+            'trenKemandirianKawasan' => $trenKemandirianKawasan,
         ]);
     }
 
@@ -140,12 +154,15 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
+        $trenKemandirianKawasan = $kawasan ? NeracaStat::trenKemandirianHarian(14, $kawasan->id) : null;
+
         return view('dashboard.warga', [
             'user' => $user,
             'kawasan' => $kawasan,
             'periode' => $periode,
             'jumlahPerStatusTumpukan' => $jumlahPerStatusTumpukan,
             'laporanTerakhir' => $laporanTerakhir,
+            'trenKemandirianKawasan' => $trenKemandirianKawasan,
         ]);
     }
 }

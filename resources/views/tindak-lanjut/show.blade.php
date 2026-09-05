@@ -12,9 +12,12 @@
         };
     @endphp
 
-    <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-lg font-semibold text-tinta">Detail Laporan Tumpukan Liar</h1>
-        <a href="{{ route('tindak-lanjut.index') }}" class="rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
+    <div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-semibold text-tinta">Detail Laporan Tumpukan Liar</h1>
+            <p class="mt-1 text-sm text-lembut">{{ $laporan->kawasan->kode_kawasan ?? '-' }} — {{ $laporan->lokasi }}</p>
+        </div>
+        <a href="{{ route('tindak-lanjut.index') }}" class="rounded-md border border-garis px-4 py-2 text-sm font-medium text-tinta hover:bg-latar">Kembali</a>
     </div>
 
     <div class="mb-6 rounded-lg border border-garis bg-permukaan p-6">
@@ -51,7 +54,8 @@
     @if ($laporan->status !== 'selesai')
         <div class="max-w-lg rounded-lg border border-garis bg-permukaan p-6">
             <h2 class="mb-3 text-sm font-semibold text-lembut">Perbarui Status Tindak Lanjut</h2>
-            <form method="POST" action="{{ route('tindak-lanjut.update-status', $laporan->id) }}" class="space-y-4">
+            <form method="POST" action="{{ route('tindak-lanjut.update-status', $laporan->id) }}" class="space-y-4"
+                onsubmit="return sinerkaKonfirmasi(this, 'Perbarui status tindak lanjut laporan ini?')">
                 @csrf
                 @method('PUT')
 

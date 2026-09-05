@@ -3,7 +3,10 @@
 @section('judul', 'Laporkan Tumpukan Liar')
 
 @section('content')
-    <h1 class="mb-6 text-lg font-semibold text-tinta">Laporkan Tumpukan Liar</h1>
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold text-tinta">Laporkan Tumpukan Liar</h1>
+        <p class="mt-1 text-sm text-lembut">Sertakan lokasi, deskripsi, dan foto agar petugas dapat menindaklanjuti dengan cepat.</p>
+    </div>
 
     <div class="max-w-xl">
         <form method="POST" action="{{ route('warga.laporan-tumpukan.store') }}" enctype="multipart/form-data" class="space-y-4">

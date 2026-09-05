@@ -3,7 +3,10 @@
 @section('judul', 'Buat Laporan Neraca')
 
 @section('content')
-    <h1 class="mb-4 text-lg font-semibold text-tinta">Buat Laporan Neraca</h1>
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold text-tinta">Buat Laporan Neraca</h1>
+        <p class="mt-1 text-sm text-lembut">Catat timbulan dan uraian tonase per jalur pengolahan hari ini.</p>
+    </div>
 
     <div class="mb-4 rounded-lg border border-garis bg-permukaan p-6">
         <h2 class="mb-3 text-sm font-semibold text-lembut">Informasi Kuota</h2>
@@ -44,10 +47,10 @@
         </div>
 
         <h2 class="mb-2 mt-2 text-sm font-semibold text-lembut">Uraian Tonase per Jalur Pengolahan</h2>
-        <div class="mb-3 overflow-hidden rounded-lg border border-garis bg-permukaan">
-            <div class="overflow-x-auto">
+        <div class="mb-2 overflow-hidden rounded-lg border border-garis bg-permukaan">
+            <div class="max-h-[50vh] overflow-auto">
                 <table class="w-full text-sm" id="uraian-table">
-                    <thead>
+                    <thead class="sticky top-0 z-10 bg-permukaan">
                         <tr class="border-b border-garis text-left text-lembut">
                             <th class="px-4 py-2 font-medium" style="width: 40%">Jalur Pengolahan</th>
                             <th class="px-4 py-2 font-medium" style="width: 20%">Tonase (kg)</th>
@@ -90,7 +93,10 @@
             </div>
         </div>
 
-        <button type="button" id="tambah-baris" class="mb-4 rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Tambah Baris</button>
+        <div class="mb-4 flex flex-wrap items-center gap-3">
+            <button type="button" id="tambah-baris" class="rounded-md border border-garis px-3 py-1.5 text-sm font-medium text-tinta hover:bg-latar">Tambah Baris</button>
+            <p id="uraian-total-info" class="num text-sm text-lembut"></p>
+        </div>
 
         <div class="flex items-center gap-3">
             <button type="submit" class="rounded-md bg-aksi px-4 py-2 text-sm font-medium text-white hover:opacity-90">Simpan Laporan</button>
@@ -132,6 +138,54 @@
         body.appendChild(baris);
         counter++;
     });
+})();
+</script>
+@endpush
+
+@push('scripts')
+<script>
+(function () {
+    // Penghitung total tonase berjalan -- murni pratinjau di sisi klien,
+    // tidak menggantikan validasi aturan bisnis di server (yang tetap
+    // menolak total > timbulan). Memakai delegasi event pada #uraian-body
+    // supaya otomatis bekerja untuk baris yang ditambah/dihapus lewat
+    // skrip di atas, tanpa perlu mengubah skrip tersebut.
+    var body = document.getElementById('uraian-body');
+    var timbulanInput = document.getElementById('timbulan_kg');
+    var info = document.getElementById('uraian-total-info');
+
+    function format(n) {
+        return n.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function hitungTotal() {
+        var total = 0;
+
+        body.querySelectorAll('input[name*="[tonase_kg]"]').forEach(function (el) {
+            var v = parseFloat(el.value);
+            if (! isNaN(v)) {
+                total += v;
+            }
+        });
+
+        var timbulan = parseFloat(timbulanInput.value) || 0;
+        var lebih = total > timbulan;
+
+        info.textContent = 'Total tonase: ' + format(total) + ' kg dari ' + format(timbulan) + ' kg timbulan'
+            + (lebih ? ' — melebihi timbulan!' : '');
+        info.classList.toggle('text-kritis', lebih);
+        info.classList.toggle('text-lembut', ! lebih);
+    }
+
+    body.addEventListener('input', function (e) {
+        if (e.target.matches('input[name*="[tonase_kg]"]')) {
+            hitungTotal();
+        }
+    });
+
+    timbulanInput.addEventListener('input', hitungTotal);
+
+    hitungTotal();
 })();
 </script>
 @endpush

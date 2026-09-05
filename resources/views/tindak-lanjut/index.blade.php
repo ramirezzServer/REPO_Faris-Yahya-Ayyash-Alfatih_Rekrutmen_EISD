@@ -3,12 +3,15 @@
 @section('judul', 'Tindak Lanjut Tumpukan')
 
 @section('content')
-    <h1 class="mb-4 text-lg font-semibold text-tinta">Tindak Lanjut Laporan Tumpukan Liar</h1>
+    <div class="mb-6">
+        <h1 class="text-xl font-semibold text-tinta">Tindak Lanjut Laporan Tumpukan Liar</h1>
+        <p class="mt-1 text-sm text-lembut">Kelola tindak lanjut laporan tumpukan liar yang dikirim warga.</p>
+    </div>
 
     <div class="overflow-hidden rounded-lg border border-garis bg-permukaan">
-        <div class="overflow-x-auto">
+        <div class="max-h-[70vh] overflow-auto">
             <table class="w-full text-sm">
-                <thead>
+                <thead class="sticky top-0 z-10 bg-permukaan">
                     <tr class="border-b border-garis text-left text-lembut">
                         <th class="px-4 py-2 font-medium">Tanggal</th>
                         <th class="px-4 py-2 font-medium">Kawasan</th>
@@ -28,7 +31,7 @@
                                 default => 'border-garis text-lembut',
                             };
                         @endphp
-                        <tr class="border-b border-garis last:border-0">
+                        <tr class="border-b border-garis last:border-0 hover:bg-latar">
                             <td class="px-4 py-3">{{ $l->created_at->format('d M Y') }}</td>
                             <td class="px-4 py-3">{{ $l->kawasan->kode_kawasan ?? '-' }}</td>
                             <td class="px-4 py-3">{{ $l->user->name ?? '-' }}</td>
@@ -40,7 +43,10 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-6 text-center text-lembut">Belum ada laporan tumpukan liar.</td>
+                            <td colspan="6" class="px-4 py-12 text-center">
+                                <p class="text-sm text-tinta">Belum ada laporan tumpukan liar.</p>
+                                <p class="mt-1 text-sm text-lembut">Laporan yang perlu ditindaklanjuti akan muncul di sini.</p>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
